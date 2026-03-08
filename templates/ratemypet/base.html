@@ -6,11 +6,27 @@
         <title>
             RateMyPet -
             {% block title_block %}
-                Yo this is Gator
             {% endblock %}
         </title>
     </head>
     <body>
+        <hr /> 
+        <div>
+            <ul>
+            {% if user.is_authenticated %}
+                <li><a href = "{% url 'ratemypet:home' %}"> Home</a></li>
+                <li><a href = "{% url 'ratemypet:post' %}"> Post</a></li>
+                <li><a href = "{% url 'ratemypet:messages' %}"> Messages</a></li>
+                <li><a href = "{% url 'ratemypet:notifications' %}"> Notifications</a></li>
+                <li><a href = "{% url 'ratemypet:profile' %}"> Profile</a></li>
+                <li><a href = "{% url 'ratemypet:search' %}"> Search</a></li>
+                <li><a href = "{% url 'auth_logout' %}"> Logout</a></li>
+            {% else %}
+                <li><a href = "{% url 'registration_register' %}"> Sign Up</a></li>
+                <li><a href = "{% url 'login' %}"> login</a></li>
+            {% endif %}
+            </ul>
+        </div>
         {% block body_block %}
         {% endblock %}
     </body>

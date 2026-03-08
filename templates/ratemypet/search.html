@@ -1,0 +1,15 @@
+{% extends 'ratemypet/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    Search
+{% endblock %}
+
+{% block body_block %}
+<h1>Search page</h1>
+<ul>
+    <li><a href = "{% url 'ratemypet:users' %}"> Search Users</a></li>
+    <li><a href = "{% url 'ratemypet:pets' %}"> Search pets</a></li>
+</ul>
+
+{% endblock %}
