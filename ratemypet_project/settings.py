@@ -42,6 +42,7 @@ LOGIN_URL = 'auth_login'
 LOGOUT_REDIRECT_URL = 'login'
 
 INSTALLED_APPS = [
+    'registration',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ratemypet',
-    'registration',
 ]
 
 MIDDLEWARE = [
