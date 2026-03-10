@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 {% load staticfiles %}
-{% load rango_templates_tags %}
 
 <html>
     <head>
@@ -9,6 +8,8 @@
             {% block title_block %}
             {% endblock %}
         </title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     </head>
     <body>
         <hr /> 
