@@ -1,0 +1,16 @@
+{% extends 'ratemypet/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    Profile
+{% endblock %}
+
+{% block body_block %}
+<h1>Your Profile</h1>
+
+<ul>
+    <li><a href = "{% url 'ratemypet:edit' %}"> Edit profile</a></li>
+    <li><a href = "{% url 'ratemypet:settings' %}"> Settings</a></li>
+</ul>
+
+{% endblock %}
