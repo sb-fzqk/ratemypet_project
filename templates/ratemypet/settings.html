@@ -6,6 +6,33 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Settings page</h1>
+    <div class="feed">
+    <h1> Settings</h1>
+
+    <div class="change">
+            <label>Change Password: </label>
+            <textarea name="change" id="change-input"></textarea>
+            <button type="submit" class="upload-btn"> Change </button>
+    </div>
+
+    <!-- need to check if the logout button works -->
+    <div class="logout">
+        Do you want to logout? 
+
+        <form method="post" action="{% url 'auth_logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="upload-btn">Logout</button>
+        </form>
+    </div>
+
+    <!-- need to check if the delete button work - need to put it in urls and views -->
+    <div class="delete">
+        Do you want to delete your account?
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="upload-btn">Delete</button>
+        </form>
+    </div>
+    </div>
 
 {% endblock %}
