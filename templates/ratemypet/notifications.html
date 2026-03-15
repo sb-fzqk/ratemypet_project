@@ -6,6 +6,36 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Notifications page</h1>
+    <div class="feed">
+    <h1> Notifications</h1>
 
+    <div class="notification-box">
+        <div class="Likes">
+           <h2>Likes:</h2> 
+           <!-- needs to have a loop function here -->
+            <!-- if there is no likes then should say no likes or blank -->
+           {} has liked your post 
+
+        </div>
+
+        <div class="Comments">
+            <h2>Comments:</h2>
+            <!-- needs to have a loop function here -->
+             <!-- if there is no comments then should say no comments or blank -->
+            {} has commented on your post 
+
+        </div>
+
+        
+        <h2>Friends Request:</h2> 
+        <div class="friends-request">
+            <!-- needs to have a loop function here -->
+             <!-- if there is no request then should say no request or blank -->
+            {} has sent a friends request
+            <!-- buttons should connect to the database -->
+            <button class="notif-btn">Accept</button>
+            <button class="notif-btn">Decline</button>
+        </div>
+    </div>
+    </div>
 {% endblock %}
