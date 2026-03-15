@@ -8,29 +8,53 @@
             {% block title_block %}
             {% endblock %}
         </title>
+
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     </head>
+
     <body>
-        <hr /> 
-        <div>
-            <ul>
-            {% if user.is_authenticated %}
-                <li><a href = "{% url 'ratemypet:home' %}"> Home</a></li>
-                <li><a href = "{% url 'ratemypet:post' %}"> Post</a></li>
-                <li><a href = "{% url 'ratemypet:messages' %}"> Messages</a></li>
-                <li><a href = "{% url 'ratemypet:notifications' %}"> Notifications</a></li>
-                <li><a href = "{% url 'ratemypet:profile' %}"> Profile</a></li>
-                <li><a href = "{% url 'ratemypet:search' %}"> Search</a></li>
-                <li><a href = "{% url 'auth_logout' %}"> Logout</a></li>
-            {% else %}
-                <li><a href = "{% url 'registration_register' %}"> Sign Up</a></li>
-                <li><a href = "{% url 'login' %}"> login</a></li>
-            {% endif %}
-            </ul>
-        </div>
-        {% block body_block %}
-        {% endblock %}
+        {% if user.is_authenticated %}
+            <div class="container">
+                <div class="sidebar">
+                    <h2 class="logo">
+                        <i class="fa-solid fa-paw" style="color: #9FC5F8;"><span> RateMyPet</span></i>
+                    </h2>
+
+                    <a class="menu-item" href="{% url 'ratemypet:home' %}">
+                        <i class="fa-solid fa-house"></i> <span>Home</span>
+                    </a>
+                    <a class="menu-item" href="{% url 'ratemypet:post' %}">
+                        <i class="fa-solid fa-add"></i> <span>Post</span>
+                    </a>
+                    <a class="menu-item" href="{% url 'ratemypet:messages' %}">
+                        <i class="fa-solid fa-comment-dots"></i> <span>Messages</span>
+                    </a>
+                    <a class="menu-item" href="{% url 'ratemypet:notifications' %}">
+                        <i class="fa-solid fa-bell"></i> <span>Notifications</span>
+                    </a>
+                    <a class="menu-item" href="{% url 'ratemypet:search' %}">
+                        <i class="fa-solid fa-magnifying-glass"></i> <span>Search</span>
+                    </a>
+                    <a class="menu-item" href="{% url 'ratemypet:profile' %}">
+                        <i class="fa-solid fa-user"></i> <span>Profile</span>
+                    </a>
+                    <a class="menu-item" href="{% url 'ratemypet:settings' %}">
+                        <i class="fa-solid fa-gear"></i> <span>Settings</span>
+                    </a>
+                </div>
+
+                <div class="content">
+                    {% block body_block %}
+                    {% endblock %}
+                </div>
+            </div>
+        {% else %}
+            <div class="auth-links">
+                <a href="{% url 'registration_register' %}">Sign Up</a>
+                <a href="{% url 'login' %}">Login</a>
+            </div>
+        {% endif %}
     </body>
 
 </html>
