@@ -208,6 +208,41 @@ select{
     padding: 5px;
 }
 
+/* notification page */
+
+.notification-box{
+    background: white;
+    border: 2px solid black;
+    margin-top: 30px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 20px;
+
+}
+
+.notification-box h2{
+    font-size: 20px;
+}
+
+.friends-request{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* flex-wrap: wrap; */
+}
+
+.notif-btn{
+    background: white;
+    border: 2px solid black;
+    padding:5px 15px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.notif-btn:hover {
+    background-color: #9FC5F8;
+    border-radius: 5px;
+}
 
 
 
