@@ -6,10 +6,21 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Search page</h1>
-<ul>
-    <li><a href = "{% url 'ratemypet:users' %}"> Search Users</a></li>
-    <li><a href = "{% url 'ratemypet:pets' %}"> Search pets</a></li>
-</ul>
+    <div class="feed">
+    <h1> Search</h1>
 
+    <div class="search">
+        <form method="GET">
+            <!-- need to test the search bar -->
+            <!-- probably need an if statement if there isnt a users/pets then you cant go to the page -->
+            <!-- and also if it is a blank then cant press the buttons -->
+            <input type="text" name="q" placeholder="Search username/category">
+
+            <div class="search-btn">
+                <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:search_users' %}">Search Users</button>
+                <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:search_pets' %}">Search Pets</button>
+            </div>
+        </form>
+    </div>
+    </div>
 {% endblock %}

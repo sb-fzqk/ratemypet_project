@@ -256,7 +256,15 @@ select{
     height: 70px;
 }
 
+/* search page */
 
+.search{
+    margin-top: 30px;
+}
+
+.search-btn{
+    margin-top: 30px;
+}
 
 
 
