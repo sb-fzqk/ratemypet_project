@@ -1,8 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db.models import Q
-from ratemypet.models import Message
 
 @login_required
 def home(request):
@@ -18,40 +15,7 @@ def notifications(request):
 
 @login_required
 def messages(request):
-    # Get all users the current user has exchanged messages with
-    sent = Message.objects.filter(sender=request.user).values_list('receiver', flat=True)
-    received = Message.objects.filter(receiver=request.user).values_list('sender', flat=True)
-    contact_ids = set(sent) | set(received)
-    contacts = User.objects.filter(id__in=contact_ids)
-
-    # Get all users for starting new conversations
-    all_users = User.objects.exclude(id=request.user.id)
-
-    context = {'contacts': contacts, 'all_users': all_users}
-    return render(request, 'ratemypet/messages.html', context)
-
-@login_required
-def conversation(request, username):
-    other_user = get_object_or_404(User, username=username)
-
-    if request.method == 'POST':
-        content = request.POST.get('content', '').strip()
-        if content:
-            Message.objects.create(
-                sender=request.user,
-                receiver=other_user,
-                content=content,
-            )
-        return redirect('ratemypet:conversation', username=username)
-
-    # Get all messages between the two users
-    chat_messages = Message.objects.filter(
-        (Q(sender=request.user) & Q(receiver=other_user)) |
-        (Q(sender=other_user) & Q(receiver=request.user))
-    )
-
-    context = {'chat_messages': chat_messages, 'other_user': other_user}
-    return render(request, 'ratemypet/conversation.html', context)
+    return render(request, 'ratemypet/messages.html')
 
 @login_required
 def profile(request):

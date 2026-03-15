@@ -45,19 +45,15 @@ class Comment(models.Model):
         return self.content[:30]
 
 
-class Message(models.Model):
-    CONTENT_MAX_LENGTH = 500
+#class Message(models.Model):
+#    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+#    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+#    content = models.IntegerField()
 
-    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
-    content = models.CharField(max_length=CONTENT_MAX_LENGTH)
-    timestamp = models.DateTimeField(auto_now_add=True)
+#    def __str__(self):
+#        return "{} -> {}".format(self.sender, self.receiver)
 
-    class Meta:
-        ordering = ['timestamp']
-
-    def __str__(self):
-        return "{} -> {}".format(self.sender, self.receiver)
+#We'll need to implement the actual chat first.
 
 
 #class Notification(models.Model):
