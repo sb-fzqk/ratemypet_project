@@ -6,6 +6,36 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Messages page</h1>
+<h1>Messages</h1>
+
+<div class="messages-container">
+    <!-- Existing conversations -->
+    {% if contacts %}
+    <div class="conversations-list">
+        <h3>Your Conversations</h3>
+        {% for contact in contacts %}
+        <a href="{% url 'ratemypet:conversation' contact.username %}" class="conversation-item">
+            <i class="fa-solid fa-user"></i>
+            <span>{{ contact.username }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Start new conversation -->
+    <div class="new-conversation">
+        <h3>Start a New Conversation</h3>
+        <form method="get" action="">
+            {% for u in all_users %}
+            <a href="{% url 'ratemypet:conversation' u.username %}" class="conversation-item">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>{{ u.username }}</span>
+            </a>
+            {% empty %}
+            <p>No other users to message yet.</p>
+            {% endfor %}
+        </form>
+    </div>
+</div>
 
 {% endblock %}
