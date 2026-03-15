@@ -103,6 +103,66 @@ body {
     font-size: 50px;
 }
 
+.post{
+    width: 400px;
+    background: #9FC5F8;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.post-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.user-info{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.post-image{
+    display: flex;
+    justify-content: center;
+}
+
+.post-image img{
+    width: 100% ;
+    max-width: 220px ;
+    height: auto ;
+    max-height: 200px ;
+    display: block ;
+}
+
+
+.post-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:5px;
+}
+
+.pet-type{
+    margin-left:auto;
+}
+
+.post-caption{
+    background:white;
+    border:2px solid #333;
+    padding:8px;
+    margin-top:8px;
+}
+
+.post-comment{
+    background:white;
+    border:2px solid #333;
+    padding:8px;
+    margin-top:5px;
+}
+
+
 /* Messages page */
 .messages-container {
     width: 100%;
