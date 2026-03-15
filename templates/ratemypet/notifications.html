@@ -11,30 +11,30 @@
 
     <div class="notification-box">
         <div class="Likes">
-           <h2>Likes:</h2> 
-           <!-- needs to have a loop function here -->
-            <!-- if there is no likes then should say no likes or blank -->
-           {} has liked your post 
-
+           <h2>Likes:</h2>
+           {% for post in liked_posts %}
+               Your post "{{ post.caption }}" has {{ post.likes }} like{{ post.likes|pluralize }}
+               <br>
+           {% empty %}
+               No likes yet.
+           {% endfor %}
         </div>
 
         <div class="Comments">
             <h2>Comments:</h2>
-            <!-- needs to have a loop function here -->
-             <!-- if there is no comments then should say no comments or blank -->
-            {} has commented on your post 
-
+            {% for comment in recent_comments %}
+                <strong>{{ comment.user_name.username }}</strong> has commented on your post "{{ comment.post.caption }}"
+                <br>
+            {% empty %}
+                No comments yet.
+            {% endfor %}
         </div>
 
-        
-        <h2>Friends Request:</h2> 
+
+        <h2>Friends Request:</h2>
         <div class="friends-request">
-            <!-- needs to have a loop function here -->
-             <!-- if there is no request then should say no request or blank -->
-            {} has sent a friends request
-            <!-- buttons should connect to the database -->
-            <button class="notif-btn">Accept</button>
-            <button class="notif-btn">Decline</button>
+            No friend requests yet.
+            <!-- Friend requests will be available once the Friendship model is implemented -->
         </div>
     </div>
     </div>

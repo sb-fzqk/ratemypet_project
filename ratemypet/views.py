@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-from ratemypet.models import Message
+from ratemypet.models import Message, Post, Comment
 
 @login_required
 def home(request):
@@ -14,7 +14,20 @@ def post(request):
 
 @login_required
 def notifications(request):
-    return render(request, 'ratemypet/notifications.html')
+    # Get comments on the current user's posts
+    user_posts = Post.objects.filter(user_name=request.user)
+    recent_comments = Comment.objects.filter(post__in=user_posts).exclude(
+        user_name=request.user
+    ).order_by('-id')[:20]
+
+    # Get posts by the user that have likes
+    liked_posts = user_posts.filter(likes__gt=0)
+
+    context = {
+        'recent_comments': recent_comments,
+        'liked_posts': liked_posts,
+    }
+    return render(request, 'ratemypet/notifications.html', context)
 
 @login_required
 def messages(request):
@@ -64,6 +77,12 @@ def edit_profile(request):
 @login_required
 def settings_views(request):
     return render(request, 'ratemypet/settings.html')
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        request.user.delete()
+        return redirect('login')
 
 @login_required
 def search(request):

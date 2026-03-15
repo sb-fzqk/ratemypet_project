@@ -25,12 +25,11 @@
         </form>
     </div>
 
-    <!-- need to check if the delete button work - need to put it in urls and views -->
     <div class="delete">
         Do you want to delete your account?
-        <form method="post">
+        <form method="post" action="{% url 'ratemypet:delete_account' %}">
             {% csrf_token %}
-            <button type="submit" class="upload-btn">Delete</button>
+            <button type="submit" class="upload-btn" onclick="return confirm('Are you sure you want to delete your account? This cannot be undone.')">Delete</button>
         </form>
     </div>
     </div>
