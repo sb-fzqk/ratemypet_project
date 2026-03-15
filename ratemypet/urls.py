@@ -10,6 +10,7 @@ urlpatterns = [
     path('post/', views.post, name='post'),
     path('notifications/', views.notifications, name='notifications'),
     path('messages/', views.messages, name='messages'),
+    path('messages/<str:username>/', views.conversation, name='conversation'),
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('settings/', views.settings_views, name='settings'),
