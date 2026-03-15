@@ -175,7 +175,7 @@ body {
 .upload-btn{
     background: white;
     border: 2px solid black;
-    padding:10px 15px;
+    padding:5px 15px;
     border-radius:6px;
     cursor:pointer;
 }
@@ -229,7 +229,6 @@ select{
     display: flex;
     align-items: center;
     gap: 10px;
-    /* flex-wrap: wrap; */
 }
 
 .notif-btn{
@@ -244,5 +243,20 @@ select{
     background-color: #9FC5F8;
     border-radius: 5px;
 }
+
+/* settings page */
+
+.change{
+    margin-bottom: 30px;
+    font-style: bold;
+    margin-top: 50px;
+}
+
+.textarea{
+    width: 300px;
+    height: 70px;
+}
+
+
 
 
