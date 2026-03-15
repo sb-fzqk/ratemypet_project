@@ -6,6 +6,73 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Post page</h1>
+    <div class="feed">
+    <h1> Post</h1>
+
+    <form method="add" enctype="multipart/form-data" onsubmit="return validateForm()">
+        {% csrf_token %}
+
+        <div class="upload">
+            <label class="upload-btn">
+                Add Image
+                <input type="file" name="image" id="image-input" hidden>
+            </label>
+
+            <img id="preview" style="display: none; max-width: 250px; margin-top: 15px;">
+
+            <br><br>
+
+        </div>
+
+        <div class="caption">
+            <label>Caption</label>
+            <textarea name="caption" id="caption-input"></textarea>
+        </div>
+
+        <div class="category">
+            <label>Category</label>
+            <select name="category" id="category-select">
+                <option value="" disabled selected>Select category</option>
+                <option>Dog</option>
+                <option>Cat</option>
+                <option>Rabbit</option>
+                <option>Other</option>
+            </select>
+        </div>
+
+        <!-- connect it to the database -->
+
+        <button type="submit" class="upload-btn"> Post </button>
+        
+    </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            const imageInput = document.getElementById('image-input');
+            const captionInput = document.getElementById('caption-input');
+            const categorySelect = document.getElementById('category-select');
+
+            if (!imageInput.files[0] || !captionInput.value.trim() || !categorySelect.value) {
+                alert('Please fill in all the requirements');
+                return false;
+            }
+            
+            return true
+        }
+
+        document.getElementById('image-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
 
 {% endblock %}

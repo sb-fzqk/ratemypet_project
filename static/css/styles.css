@@ -88,6 +88,8 @@ body {
     align-items: flex-start;
 }
 
+/* home page */
+
 .feed {
     width: 400px;
 }
@@ -157,9 +159,55 @@ body {
 }
 
 .post-comment{
-    background:white;
+    background-color:white;
     border:2px solid #333;
     padding:8px;
     margin-top:5px;
 }
+
+/* post page */
+
+.upload{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.upload-btn{
+    background: white;
+    border: 2px solid black;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.upload-btn:hover {
+    background-color: #9FC5F8;
+    border-radius: 5px;
+}
+
+#preview{
+    display: block;
+    margin-top: 15px;
+    border-radius: 6px;
+}
+
+.caption{
+    margin-bottom: 30px;
+    font-style: bold;
+}
+
+.textarea{
+    width: 300px;
+    height: 80px;
+}
+
+.category{
+    margin-bottom: 30px;
+}
+
+select{
+    padding: 5px;
+}
+
+
 
