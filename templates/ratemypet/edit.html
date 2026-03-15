@@ -6,6 +6,49 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Edit Profile page</h1>
+    <div class="feed">
+        <h1> Edit Profile</h1>   
+
+    <form method="add" enctype="multipart/form-data" onsubmit="return validateForm()">
+        {% csrf_token %}
+
+        <div class="upload">
+            <label class="upload-btn">
+                Add Image
+                <input type="file" name="image" id="image-input" hidden>
+            </label>
+
+            <img id="preview" style="display: none; max-width: 250px; margin-top: 15px;">
+
+            <br><br>
+
+        </div>
+
+        <div class="caption">
+            <label>Bio</label>
+            <textarea name="caption" id="caption-input"></textarea>
+        </div>
+
+        <!-- connect it to the database -->
+
+        <button type="submit" class="upload-btn"> Save </button>
+    </form>
+
+    <script>
+        document.getElementById('image-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+        
+    </div>
 
 {% endblock %}
