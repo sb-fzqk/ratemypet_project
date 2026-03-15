@@ -266,6 +266,51 @@ select{
     margin-top: 30px;
 }
 
+/* profile page */
+
+.profile{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.profile-pic{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border:3px solid black;
+    margin-top: 30px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-pic i{
+    font-size: 50px;
+}
+
+.info{
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+.bio{
+    background: white;
+    border: 2px solid black;
+    padding: 10px;
+    width: 250px;
+    margin-top: 10px;
+}
+
+.posts{
+    margin-top: 40px;
+}
+
+
+
 
 
 /* Messages page */

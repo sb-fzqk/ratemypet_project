@@ -6,11 +6,64 @@
 {% endblock %}
 
 {% block body_block %}
-<h1>Your Profile</h1>
+    <div class="feed">
+    <h1> My Profile</h1>
 
-<ul>
-    <li><a href = "{% url 'ratemypet:edit' %}"> Edit profile</a></li>
-    <li><a href = "{% url 'ratemypet:settings' %}"> Settings</a></li>
-</ul>
+    <div class="profile">
+        <!-- need to get the image of  the user
+        if there is not user then below code -->
+        <div class="profile-pic">
+            <i class="fa-regular fa-user"></i>
+        </div>
+
+        <div class="info">
+            <!-- get the username of the user -->
+            <h3>User</h3>
+            <!-- needs to change the 10 to getting the number of friends the user have -->
+            <p> Friends: 10</p>
+        </div>
+
+        <div class="bio">
+            <!-- needs to get the bio of the user -->
+            test 
+        </div>
+
+        <form method="get">
+            <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:edit_profile' %}">Edit</button>
+        </form>
+        
+
+        {#  for post in posts -> loop through all the posts of my profile#}
+        <!-- if statement if there is no post -> wirte you have no posts -->
+        <div class="posts">
+            <div class="post">
+
+                <div class="post-image">
+                    <!-- put the post.image instead of hard coding it  -->
+                    <img src="{% static 'images/rabbit.jpg' %}" alt="Rabbit">
+                </div>
+
+                <div class="post-actions">
+                    <!-- make heart a button connent it to the database  -->
+                    <i class="fa-regular fa-heart"></i>
+                    <!-- make comment a button to see all the other comments -->
+                    <i class="fa-regular fa-comment"></i>
+                    <!-- get the pet category -->
+                    <span class="pet-type">Rabbit</span>
+                </div>
+
+                <div class="post-caption">
+                    <!-- get he post caption -->
+                    Running Rabbit
+                </div>
+
+                <div class="post-comment">
+                    <!-- get the most recent comment  -->
+                    <b>user2:</b> OMG LOVE
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
 
 {% endblock %}
