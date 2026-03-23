@@ -13,7 +13,18 @@
 
     </head>
     <body>
-        {% block body_block %}
-        {% endblock %} 
+
+        <div class="container">
+            {% block header_block %}
+            {% endblock %}
+ 
+
+            <div class="box">
+                {% block body_block %}
+                {% endblock %}
+            </div>
+        </div>
+
+         
     </body>
 </html>

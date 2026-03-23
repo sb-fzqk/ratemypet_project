@@ -3,28 +3,25 @@
 {% block title_block %}
     Login
 {% endblock %}
+ 
+{% block header_block %}
+    <h1> RateMyPet </h1>
+{% endblock %}
 
 {% block body_block %}
-    <div class="container">
-    <h1> RateMyPet </h1>
+    <form method="post" action=".">
+        {% csrf_token %}
+        {{ form.as_p }}
 
-        <div class="box">
-            <form method="post" action=".">
-                {% csrf_token %}
+        <input type="submit" value="Log In" />
+        <input type="hidden" name="next" value="{{ next }}" />
+    </form>
 
-                {{ form.as_p }}
+    <p>
+        Not registered?
+        <a href="{% url 'registration_register' %}">Register here!</a>
+    </p>
+    {% endblock %}
 
-                <input type="submit" value="Log In" />
-                <input type="hidden" name="next" value="{{ next }}" />
-            </form>
-
-            <p>
-                Not registered?
-                <a href="{% url 'registration_register' %}">Register here!</a>
-            </p>
-            {% endblock %}
-
-        </div>
-       
-    </div>
+  
 
