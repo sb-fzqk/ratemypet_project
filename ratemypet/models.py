@@ -1,14 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 
 class UserProfile(models.Model):
     NAME_MAX_LENGTH = 30
     ABOUT_MAX_LENGTH = 100
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     picture = models.ImageField(upload_to='profile_images', blank=True)
     about = models.CharField(max_length=ABOUT_MAX_LENGTH, blank=True)
 
@@ -73,21 +71,27 @@ class Message(models.Model):
 
 #We'll need to implement the actual views first.
 
-#class Friendship(models.Model):
-#    requester_name = models.ForeignKey(User, related_name='sent_requests', on_delete=models.CASCADE)
-#    reciever_name = models.ForeignKey(User, related_name='received_requests', on_delete=models.CASCADE)
-#    status = models.CharField(max_length=30)
+class Friendship(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected")
+    ]
+    requester = models.ForeignKey(User, related_name='sent_requests', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_requests', on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
-#    def __str__(self):
-#        return "{} -> {} ({})".format(self.requester, self.receiver, self.status)
+    def __str__(self):
+        return "{} to {} (status: {})".format(self.requester, self.receiver, self.status)
 
-#We'll need to implement the actual friendship first.
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(user=instance)
 
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+
+
+
+
+
+
+
+
+

@@ -33,8 +33,18 @@
 
         <h2>Friends Request:</h2>
         <div class="friends-request">
-            No friend requests yet.
-            <!-- Friend requests will be available once the Friendship model is implemented -->
+            {% for request in pending_requests %}
+                <p><strong>{{ request.sender.username }}</strong> sent you a friend request.</p>
+
+                <a href="{% url 'accept_request' request.id %}" class="btn-accept">Accept</a>
+
+                <form action="{% url 'decline_request' request.id %}" method="POST" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-decline">Decline</button>
+                </form>
+            {% empty %}
+                <p>No new friendship requests.</p>
+            {% endfor %}
         </div>
     </div>
     </div>

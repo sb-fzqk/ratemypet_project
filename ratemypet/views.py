@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-from ratemypet.models import Message, Post, Comment, UserProfile
+from ratemypet.models import Message, Post, Comment
 
 def register(request):
     if request.method == "POST":
@@ -37,6 +37,9 @@ def notifications(request):
     recent_comments = Comment.objects.filter(post__in=user_posts).exclude(
         user_name=request.user
     ).order_by('-id')[:20]
+    pending_requests = Friendship.objects.filter(
+        friend=request.user,
+        status='pending').select_related('sender')
 
     # Get posts by the user that have likes
     liked_posts = user_posts.filter(likes__gt=0)
@@ -44,8 +47,15 @@ def notifications(request):
     context = {
         'recent_comments': recent_comments,
         'liked_posts': liked_posts,
+        'pending_requests': pending_requests
     }
     return render(request, 'ratemypet/notifications.html', context)
+
+@login_required
+def decline_friend_request(request, friendship_id):
+    friendship = get_object_or_404(Friendship, id=friendship_id, friend=request.user)
+    friendship.delete()
+    return redirect('notifications')
 
 @login_required
 def messages(request):
@@ -86,25 +96,11 @@ def conversation(request, username):
 
 @login_required
 def profile(request):
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-    
     return render(request, 'ratemypet/profile.html')
 
 @login_required
 def edit_profile(request):
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
-
-    if request.method == 'POST':
-        profile.about = request.POST.get('caption')
-
-        if 'image' in request.FILES:
-            profile.picture = request.FILES['image']
-
-        profile.save()
-
-        return redirect('accounts:profile')
-    
-    return render(request, 'ratemypet/edit.html', {'profile': profile})
+    return render(request, 'ratemypet/edit.html')
 
 @login_required
 def settings_views(request):
