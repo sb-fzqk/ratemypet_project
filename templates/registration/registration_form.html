@@ -4,13 +4,24 @@
     Register
 {% endblock %}
 
-{% block body_block %}
+{% block header_block %}
 <h1>Register Here</h1>
+{% endblock %}
 
+{% block body_block %}
 <form method="post" action=".">
     {% csrf_token %}
     
-    {{ form.as_p }}
+    {% for field in form %}
+    <div class="field-wrapper">
+        {{ field.label_tag }}
+        {{ field }}
+        <br />
+        {% if field.name != 'password1' and field.name != 'password2' and field.name != 'username' %}
+            {{ field.help_text }}
+        {% endif %}
+    </div>
+    {% endfor %}
 
     <input type="submit" value="Register" />
 </form>

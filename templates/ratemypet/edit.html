@@ -9,7 +9,7 @@
     <div class="feed">
         <h1> Edit Profile</h1>   
 
-    <form method="add" enctype="multipart/form-data" onsubmit="return validateForm()">
+    <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
         {% csrf_token %}
 
         <div class="upload">
