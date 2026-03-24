@@ -4,6 +4,24 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from ratemypet.models import Message, Post, Comment
 
+def register(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+        UserProfile.objects.create(
+            user=user
+        )
+        login(request, user)
+        return redirect("ratemypet:home")
+    return render(request, "ratemypet/register.html")
+
 @login_required
 def home(request):
     return render(request, 'ratemypet/home.html')
