@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-from ratemypet.models import Message, Post, Comment
+from ratemypet.models import Message, Post, Comment, UserProfile
 
 def register(request):
     if request.method == "POST":
@@ -96,11 +96,25 @@ def conversation(request, username):
 
 @login_required
 def profile(request):
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
     return render(request, 'ratemypet/profile.html')
 
 @login_required
 def edit_profile(request):
-    return render(request, 'ratemypet/edit.html')
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        profile.about = request.POST.get('caption')
+
+        if 'image' in request.FILES:
+            profile.picture = request.FILES['image']
+
+        profile.save()
+
+        return redirect('accounts:profile')
+    
+    return render(request, 'ratemypet/edit.html', {'profile': profile})
 
 @login_required
 def settings_views(request):
