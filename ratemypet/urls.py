@@ -7,7 +7,6 @@ app_name = 'ratemypet'
 
 urlpatterns = [
     path('home/', views.home, name='home'),
-    path('register/', views.register, name='register'),
     path('post/', views.post, name='post'),
     path('notifications/', views.notifications, name='notifications'),
     path('messages/', views.messages, name='messages'),

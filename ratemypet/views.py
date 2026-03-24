@@ -2,33 +2,47 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-from ratemypet.models import Message, Post, Comment, UserProfile
-
-def register(request):
-    if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
-        UserProfile.objects.create(
-            user=user
-        )
-        login(request, user)
-        return redirect("ratemypet:home")
-    return render(request, "ratemypet/register.html")
+from ratemypet.models import Message, Post, Comment, UserProfile, Friendship, PetCategory
 
 @login_required
 def home(request):
-    return render(request, 'ratemypet/home.html')
+    posts = Post.objects.all().order_by('-date_posted')
+
+    user_friends = request.user.profile.friends.all()
+
+    context = {
+        'posts': posts,
+        'user_friends': user_friends
+    }
+    
+    return render(request, 'ratemypet/home.html', context)
 
 @login_required
 def post(request):
-    return render(request, 'ratemypet/post.html')
+    if request.method == 'POST':
+        image = request.FILES.get('image')
+        caption = request.POST.get('caption')
+        
+        existing_category_id = request.POST.get('category')
+        new_category = request.POST.get('new_category')
+        category = None
+
+        if new_category:
+            category, created = PetCategory.objects.get_or_create(name=new_category)
+        elif existing_category_id:
+            category = PetCategory.objects.get(id=existing_category_id)
+
+        if image and caption and category:
+            new_post = Post.objects.create(
+                author=request.user,
+                image=image,
+                caption=caption,
+                category=category
+            )
+            return redirect('ratemypet:home')
+    
+    pet_categories = PetCategory.objects.all()
+    return render(request, 'ratemypet/post.html', {'pet_categories': pet_categories})
 
 @login_required
 def notifications(request):
@@ -38,8 +52,8 @@ def notifications(request):
         user_name=request.user
     ).order_by('-id')[:20]
     pending_requests = Friendship.objects.filter(
-        friend=request.user,
-        status='pending').select_related('sender')
+        receiver=request.user,
+        status='pending').select_related('requester')
 
     # Get posts by the user that have likes
     liked_posts = user_posts.filter(likes__gt=0)
@@ -53,7 +67,7 @@ def notifications(request):
 
 @login_required
 def decline_friend_request(request, friendship_id):
-    friendship = get_object_or_404(Friendship, id=friendship_id, friend=request.user)
+    friendship = get_object_or_404(Friendship, id=friendship_id, receiver=request.user)
     friendship.delete()
     return redirect('notifications')
 
@@ -112,7 +126,7 @@ def edit_profile(request):
 
         profile.save()
 
-        return redirect('accounts:profile')
+        return redirect('ratemypet:profile')
     
     return render(request, 'ratemypet/edit.html', {'profile': profile})
 

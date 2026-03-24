@@ -11,38 +11,45 @@
     <div class="feed">
     <h1> Home</h1>
 
-    {#  for post in posts -> loop through all the posts#}
+    {% for post in posts %}
     <div class="post">
 
         <div class="post-header">
             <div class="user-info">
                 <i class="fa-regular fa-user"></i>
-                <!-- instead of span, {get the username}  -->
-                <span>user1</span>  
+                <img src="{{ post.author.profile.picture.url }}" style="width:50px">
+                {{ post.author.username }}
             </div>
             <!-- add an if statement - button to make people be friends with each other -->
-            <span class="friends">Friends</span>
+            {% if post.author != user %}
+                {% if post.author in user_friends %}
+                    <span class="friends">Friends</span>
+                {% else %}
+                    <button class="btn-add-friend">Add Friend</button>
+                {% endif %}
+            {% endif %}
         </div>
 
 
         <div class="post-image">
-            <!-- put the post.image instead of hard coding it  -->
-            <img src="{% static 'images/rabbit.jpg' %}" alt="Rabbit">
+            <img src="{{ post.image.url }}" class="post-img">
         </div>
 
         <div class="post-actions">
             <!-- make heart a button connent it to the database  -->
-            <i class="fa-regular fa-heart"></i>
+            <a href="#" class="like-btn" data-id="{{ post.id }}">
+                <i class="fa-heart {% if user in post.likes.all %}fa-solid {% else %}fa-regular{% endif %}"></i>
+                <span>{{ post.likes.count }}</span>
+            </a>
             <!-- make comment a button to see all the other comments -->
             <i class="fa-regular fa-comment"></i>
             <!-- get the pet category -->
-            <span class="pet-type">Rabbit</span>
+            <span class="pet-type">{{ post.category }}</span>
         </div>
 
 
         <div class="post-caption">
-            <!-- get he post caption -->
-            Running Rabbit
+            {{ post.caption }}
         </div>
 
 
@@ -52,6 +59,7 @@
         </div>
 
     </div>
+    {% endfor %}
     </div>
 
 {% endblock %}
