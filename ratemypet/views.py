@@ -174,14 +174,6 @@ def edit_profile(request):
 
 @login_required
 def settings_views(request):
-    if request.method == "POST":
-        new_password = request.POST.get("new_password")
-
-        if new_password:
-            request.user.set_password(new_password)
-            request.user.save()
-
-            return redirect('login')
     return render(request, 'ratemypet/settings.html')
 
 @login_required
