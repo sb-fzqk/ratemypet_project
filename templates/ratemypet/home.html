@@ -23,9 +23,11 @@
             <!-- add an if statement - button to make people be friends with each other -->
             {% if post.author != user %}
                 {% if post.author in user_friends %}
-                    <span class="friends">Friends</span>
+                    <span class="friends">Friend</span>
+                {% elif post.author in friend_requests_sent or post.author in friend_requests_received %}
+                    <span class="pending">Friendship Pending</span>
                 {% else %}
-                    <button class="btn-add-friend">Add Friend</button>
+                    <a href="{% url 'ratemypet:send_request' post.author.id %}" class="add-friend-button">Add Friend</a>
                 {% endif %}
             {% endif %}
         </div>

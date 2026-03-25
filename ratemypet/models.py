@@ -9,7 +9,7 @@ class UserProfile(models.Model):
     ABOUT_MAX_LENGTH = 100
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    picture = models.ImageField(default='/static/images/bawcat.jpeg', upload_to='profile_images')
+    picture = models.ImageField(default='profile_images/default/bawcat.jpeg', upload_to='profile_images')
     about = models.CharField(max_length=ABOUT_MAX_LENGTH, blank=True)
     friends = models.ManyToManyField(User, related_name='friends', blank=True)
 
@@ -78,18 +78,13 @@ class Message(models.Model):
 
 #We'll need to implement the actual views first.
 
-class Friendship(models.Model):
-    STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("accepted", "Accepted"),
-        ("rejected", "Rejected")
-    ]
+class FriendRequest(models.Model):
     requester = models.ForeignKey(User, related_name='sent_requests', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='received_requests', on_delete=models.CASCADE)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "{} to {} (status: {})".format(self.requester, self.receiver, self.status)
+        return "{} to {}".format(self.requester, self.receiver)
     
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
