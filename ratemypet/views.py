@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from ratemypet.models import Message, Post, Comment, UserProfile, FriendRequest, PetCategory
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 @login_required
 def home(request):
