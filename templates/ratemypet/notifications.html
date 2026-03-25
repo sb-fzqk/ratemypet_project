@@ -30,9 +30,8 @@
             {% endfor %}
         </div>
 
-
-        <h2>Friends Request:</h2>
         <div class="friends-request">
+            <h2>Friends Requests:</h2>
             {% for request in pending_requests %}
                 <p><strong>{{ request.sender.username }}</strong> sent you a friend request.</p>
 
@@ -42,8 +41,9 @@
                     {% csrf_token %}
                     <button type="submit" class="btn-decline">Decline</button>
                 </form>
+                <br>
             {% empty %}
-                <p>No new friendship requests.</p>
+                No new friendship requests.
             {% endfor %}
         </div>
     </div>

@@ -13,11 +13,7 @@
         <!-- need to get the image of  the user
         if there is not user then below code -->
         <div class="profile-pic">
-            {% if user.profile.picture %}
-                <img src="{{ user.profile.picture.url }}" alt="Profile Picture" style="width:100px">
-            {% else %}
-                <img src="/static/images/bawcat.jpeg" alt="Default Profile Picture" style="width:100px">
-            {% endif %}
+            <img src="{{ user.profile.picture.url }}" alt="Profile Picture" style="width:100px">
         </div>
 
         <div class="info">

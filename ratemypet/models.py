@@ -9,8 +9,9 @@ class UserProfile(models.Model):
     ABOUT_MAX_LENGTH = 100
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    picture = models.ImageField(upload_to='profile_images', blank=True)
+    picture = models.ImageField(default='/static/images/bawcat.jpeg', upload_to='profile_images')
     about = models.CharField(max_length=ABOUT_MAX_LENGTH, blank=True)
+    friends = models.ManyToManyField(User, related_name='friends', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -27,20 +28,24 @@ class PetCategory(models.Model):
 class Post(models.Model):
     IMAGE_AND_CAPTION_MAX_LENGTH = 200
     
-    user_name = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.ForeignKey(PetCategory, on_delete=models.CASCADE)
-    
-    image_url = models.URLField(max_length=IMAGE_AND_CAPTION_MAX_LENGTH)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(PetCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    image = models.ImageField(upload_to='post_images')
     caption = models.CharField(max_length=IMAGE_AND_CAPTION_MAX_LENGTH)
-    likes = models.IntegerField(default=0)
+    likes = models.ManyToManyField(User, related_name='post_likes', blank=True)
+    date_posted = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.caption
+    
+    def total_likes(self):
+        return self.likes.count()
 
 class Comment(models.Model):
     CONTENT_MAX_LENGTH = 300
+    
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user_name = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=CONTENT_MAX_LENGTH)
 
     def __str__(self):

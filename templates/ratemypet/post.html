@@ -9,7 +9,7 @@
     <div class="feed">
     <h1> Post</h1>
 
-    <form method="add" enctype="multipart/form-data" onsubmit="return validateForm()">
+    <form method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
         {% csrf_token %}
 
         <div class="upload">
@@ -26,18 +26,23 @@
 
         <div class="caption">
             <label>Caption</label>
-            <textarea name="caption" id="caption-input"></textarea>
+            <textarea name="caption" id="caption-input" placeholder="Type your caption..."></textarea>
         </div>
 
         <div class="category">
             <label>Category</label>
             <select name="category" id="category-select">
-                <option value="" disabled selected>Select category</option>
-                <option>Dog</option>
-                <option>Cat</option>
-                <option>Rabbit</option>
-                <option>Other</option>
+                <option value="" disabled>-- Select category --</option>
+                {% for category in pet_categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
             </select>
+
+            <span>OR</span><br>
+
+            <label>Create a New Category</label>
+            <input type="text" name="new_category" id="new_category" placeholder="Type new category...">
+
         </div>
 
         <!-- connect it to the database -->
@@ -53,8 +58,16 @@
             const captionInput = document.getElementById('caption-input');
             const categorySelect = document.getElementById('category-select');
 
-            if (!imageInput.files[0] || !captionInput.value.trim() || !categorySelect.value) {
+            if (!imageInput.files[0] || !captionInput.value.trim()) {
                 alert('Please fill in all the requirements');
+                return false;
+            }
+
+            const hasExistingCat = categorySelect.value !== "";
+            const hasNewCat = newCategoryInput.value !== "";
+
+            if (!hasExistingCat && !hasNewCat) {
+                alert('Please select an existing category OR type a new one.');
                 return false;
             }
             
