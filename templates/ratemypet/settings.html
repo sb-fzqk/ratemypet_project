@@ -10,10 +10,12 @@
     <h1> Settings</h1>
 
     <div class="change">
-            <label>Change Password: </label>
-            <textarea name="change" id="change-input"></textarea>
-            <button type="submit" class="upload-btn"> Change </button>
-    </div>
+        <form method="POST">
+            {% csrf_token %}
+            <label>New Password:</label>
+            <input type="password" name="new_password">
+            <button type="submit" class="upload-btn" onclick="return confirm('Are you sure you want to change your password?')">Change Password</button>
+        </form>
 
     <!-- need to check if the logout button works -->
     <div class="logout">
