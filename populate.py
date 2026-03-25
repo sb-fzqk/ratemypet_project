@@ -35,8 +35,8 @@ def create_profile(users):
     }
 
     images = {
-        "Eleanor": os.path.join(settings.BASE_DIR, 'static/images/cat.jpg'),
-        "aligator_johnny": os.path.join(settings.BASE_DIR, 'static/images/alligator.jpg')
+        "Eleanor": os.path.join(settings.BASE_DIR, 'media/profile_images/cat.jpg'),
+        "aligator_johnny": os.path.join(settings.BASE_DIR, 'media/profile_images/alligator.jpg')
     }
 
     for user in users:
@@ -78,9 +78,9 @@ def create_posts(users):
             obj, _ = PetCategory.objects.get_or_create(name=pet_category)
 
             post = Post.objects.create(
-                user_name=user,
+                author=user,
                 caption=caption,
-                image_url=f'/static/images/{img}',
+                image=f'/post_images/{img}',
                 category=obj
             )
 
@@ -89,9 +89,12 @@ def create_posts(users):
 
 
 def add_likes(posts):
+    users = list(User.objects.all())
+
     for post in posts:
-        post.likes = random.randint(0, 10)
-        post.save()
+        random_user = random.sample(users, random.randint(0, len(users)))
+        post.likes.set(random_user)
+    
 
 def populate():
     users = create_users()
