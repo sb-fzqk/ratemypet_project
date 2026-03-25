@@ -23,7 +23,9 @@
         {% endfor %}
     </div>
 
-    <form method="post" class="chat-form">
+    <form method="post" class="chat-form"
+    data-send-url="{% url 'ratemypet:send_message' other_user.username%}"
+    data-get-url="{% url 'ratemypet:get_message' other_user.username%}">>
         {% csrf_token %}
         <input type="text" name="content" placeholder="Type a message..." required maxlength="500" autocomplete="off">
         <button type="submit"><i class="fa-solid fa-paper-plane"></i> Send</button>

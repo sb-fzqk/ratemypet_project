@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
 from ratemypet.models import Message, Post, Comment, UserProfile, Friendship, PetCategory
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 @login_required
 def home(request):
@@ -103,7 +105,7 @@ def conversation(request, username):
     chat_messages = Message.objects.filter(
         (Q(sender=request.user) & Q(receiver=other_user)) |
         (Q(sender=other_user) & Q(receiver=request.user))
-    )
+    ).order_by('timestamp')
 
     context = {'chat_messages': chat_messages, 'other_user': other_user}
     return render(request, 'ratemypet/conversation.html', context)
@@ -150,4 +152,35 @@ def search_users(request):
 
 @login_required
 def search_pets(request):
-    return render(request, 'ratemypet/pets.html')  
+    return render(request, 'ratemypet/pets.html')
+@login_required
+@require_POST
+def send_message(request, username):
+    other_user = get_object_or_404(User, user = username)
+    content = request.POST.get('content', '').strip()
+    if not content:
+        return JsonResponse({'success': False, 'error': 'message can not be empty'})
+        message = Message.objects.create(sender = request.user, receiver= other_user, content = content)
+
+        return JsonResponse({'success' : True, 'message' :{
+            'sender: ': message.sender.username,
+            'content: ': message.content,
+            'timestamp': message.timestamp.strftime('%b %d, %H:%M')
+        }})
+@login_required
+def get_message(request, username):
+    other_user = get_object_or_404(User, username=username)
+    chat_messages = Message.objects.filter(
+        (Q(sender=request.user) & Q(receiver=other_user)) |
+        (Q(sender=other_user) & Q(receiver=request.user))
+    ).order_by('timestamp')
+
+    message_data = []
+    for message in chat_messages:
+        message_data.append({
+            'sender': message.sender.username,
+            'content': message.content,
+            'timestamp': message.timestamp.strftime('%b %d, %H:%M'),
+            'is_own': message.sender == request.user
+        })
+        return JsonResponse({'message': message_data})  
