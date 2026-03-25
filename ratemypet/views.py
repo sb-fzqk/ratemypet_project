@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-from ratemypet.models import Message, Post, Comment, UserProfile, Friendship, PetCategory
+from ratemypet.models import Message, Post, Comment, UserProfile, FriendRequest, PetCategory
 
 @login_required
 def home(request):
@@ -174,6 +174,15 @@ def edit_profile(request):
 
 @login_required
 def settings_views(request):
+    if request.method == "POST":
+        new_password = request.POST.get("new_password")
+
+        if new_password:
+            request.user.set_password(new_password)
+            request.user.save()
+
+            return redirect('login')
+
     return render(request, 'ratemypet/settings.html')
 
 @login_required
