@@ -23,6 +23,6 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('', auth_views.LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('', include('registration.backends.simple.urls')),
-    path('', include('ratemypet.urls', namespace='accounts')),
+    path('', include('ratemypet.urls')),
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
