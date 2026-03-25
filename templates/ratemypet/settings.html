@@ -10,12 +10,11 @@
     <h1> Settings</h1>
 
     <div class="change">
-        <form method="post">
+        <form method="POST">
             {% csrf_token %}
-            <label>New Password: </label>
+            <label>New Password:</label>
             <input type="password" name="new_password">
-            <button type="submit" class="upload-btn"
-            onclick="return confirm('Are you sure you want to change your password?')"> Change password </button>
+            <button type="submit" class="upload-btn" onclick="return confirm('Are you sure you want to change your password?')">Change Password</button>
         </form>
     </div>
 

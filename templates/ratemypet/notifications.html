@@ -33,15 +33,13 @@
         <div class="friends-request">
             <h2>Friends Requests:</h2>
             {% for request in pending_requests %}
-                <p><strong>{{ request.sender.username }}</strong> sent you a friend request.</p>
+            <img src="{{ request.requester.profile.picture.url }}" style="width:50px">
+            <p><strong>{{ request.requester.username }}</strong> sent you a friend request.</p>
 
-                <a href="{% url 'accept_request' request.id %}" class="btn-accept">Accept</a>
-
-                <form action="{% url 'decline_request' request.id %}" method="POST" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-decline">Decline</button>
-                </form>
-                <br>
+            <div class="fr-options">
+                <a href="{% url 'ratemypet:accept_request' request.id %}">Accept</a>
+                <a href="{% url 'ratemypet:decline_request' request.id %}">Decline</a>
+            </div>
             {% empty %}
                 No new friendship requests.
             {% endfor %}
