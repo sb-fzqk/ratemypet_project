@@ -23,7 +23,7 @@
         <div class="Comments">
             <h2>Comments:</h2>
             {% for comment in recent_comments %}
-                <strong>{{ comment.user_name.username }}</strong> has commented on your post "{{ comment.post.caption }}"
+                <strong>{{ comment.requester.username }}</strong> has commented on your post "{{ comment.post.caption }}"
                 <br>
             {% empty %}
                 No comments yet.

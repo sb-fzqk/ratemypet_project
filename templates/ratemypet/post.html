@@ -46,7 +46,7 @@
         </div>
 
         <!-- connect it to the database -->
-
+        
         <button type="submit" class="upload-btn"> Post </button>
         
     </form>
@@ -57,6 +57,7 @@
             const imageInput = document.getElementById('image-input');
             const captionInput = document.getElementById('caption-input');
             const categorySelect = document.getElementById('category-select');
+            const newCategoryInput = document.getElementById('new-category');
 
             if (!imageInput.files[0] || !captionInput.value.trim()) {
                 alert('Please fill in all the requirements');

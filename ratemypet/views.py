@@ -5,24 +5,8 @@ from django.db.models import Q
 from ratemypet.models import Message, Post, Comment, UserProfile
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from ratemypet.models import Message, Post, Comment, UserProfile, Friendship, PetCategory, Notification
 
-def register(request):
-    if request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        user = User.objects.create_user(
-            username=username,
-            email=email,
-            password=password
-        )
-        UserProfile.objects.create(
-            user=user
-        )
-        login(request, user)
-        return redirect("ratemypet:home")
-    return render(request, "ratemypet/register.html")
 
 @login_required
 def home(request):
@@ -67,16 +51,16 @@ def post(request):
 @login_required
 def notifications(request):
     # Get comments on the current user's posts
-    user_posts = Post.objects.filter(user_name=request.user)
+    user_posts = Post.objects.filter(author=request.user)
     recent_comments = Comment.objects.filter(post__in=user_posts).exclude(
-        user_name=request.user
+        author=request.user
     ).order_by('-id')[:20]
     pending_requests = Friendship.objects.filter(
         receiver=request.user,
         status='pending').select_related('requester')
 
     # Get posts by the user that have likes
-    liked_posts = user_posts.filter(likes__gt=0)
+    liked_posts = user_posts.filter(likes__gt=False).distinct()
 
     context = {
         'recent_comments': recent_comments,
