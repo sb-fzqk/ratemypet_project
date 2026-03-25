@@ -68,15 +68,15 @@ class Message(models.Model):
 
 
 class Notification(models.Model):
-    user_name = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.CharField(max_length=100)
+    receiver = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True)
     type = models.CharField(max_length=30)
     is_read = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.message
-
-#We'll need to implement the actual views first.
 
 class FriendRequest(models.Model):
     requester = models.ForeignKey(User, related_name='sent_requests', on_delete=models.CASCADE)

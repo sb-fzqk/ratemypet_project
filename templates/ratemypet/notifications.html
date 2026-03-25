@@ -12,8 +12,8 @@
     <div class="box">
         <div class="Likes">
            <h2>Likes:</h2>
-           {% for post in liked_posts %}
-               Your post "{{ post.caption }}" has {{ post.likes }} like{{ post.likes|pluralize }}
+           {% for like in likes %}
+               <strong>{{ like.sender.username }}</strong> liked your post: "{{ like.post.caption|truncatechars:15 }}"
                <br>
            {% empty %}
                No likes yet.

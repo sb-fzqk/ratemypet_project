@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-from ratemypet.models import Message, Post, Comment, UserProfile, FriendRequest, PetCategory
+from ratemypet.models import Message, Post, Comment, UserProfile, FriendRequest, PetCategory, Notification
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
@@ -52,21 +52,39 @@ def post(request):
     return render(request, 'ratemypet/post.html', {'pet_categories': pet_categories})
 
 @login_required
-def add_like(request):
-    post_id = request.POST.get('id')
+def add_like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     user = request.user
+    liked = False
 
-    if user in post.total_likes:
+    if user in post.likes.all():
         post.likes.remove(user)
-        liked = False
+        Notification.objects.filter(
+            sender=user, 
+            post=post,
+            type='like').delete()
     else:
         post.likes.add(user)
         liked = True
 
+        if post.author != user:
+            exists = Notification.objects.filter(
+                sender=user,
+                post=post,
+                type='like'
+            ).exists()
+            
+            if not exists:
+                Notification.objects.create(
+                    receiver=post.author,
+                    sender=user,
+                    post=post,
+                    type='like'
+                )
+
     return JsonResponse({
         'liked': liked,
-        'count': post.total_likes
+        'count': post.total_likes()
     })
 
 @login_required
@@ -101,14 +119,12 @@ def notifications(request):
     recent_comments = Comment.objects.filter(post__in=user_posts).exclude(
         author=request.user
     ).order_by('-id')[:20]
-    pending_requests = FriendRequest.objects.filter(receiver=request.user)
-
-    # Get posts by the user that have likes
-    liked_posts = user_posts.filter(likes__gt=False).distinct()
+    pending_requests = FriendRequest.objects.filter(receiver=request.user).order_by('-time')
+    likes = Notification.objects.filter(type='like', receiver=request.user).order_by('-timestamp')[:20]
 
     context = {
         'recent_comments': recent_comments,
-        'liked_posts': liked_posts,
+        'likes': likes,
         'pending_requests': pending_requests
     }
     return render(request, 'ratemypet/notifications.html', context)
