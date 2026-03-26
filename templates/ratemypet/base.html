@@ -57,30 +57,58 @@
                 <a href="{% url 'login' %}">Login</a>
             </div>
         {% endif %}
-        </body>
 
         <script>
-        document.querySelectorAll('.like-btn').forEach(button => {
-            button.addEventListener('click', function(e) {
-                const postId = this.dataset.postId;
-                const heart = document.getElementById(`like-heart-${postId}`)
-                const count = document.getElementById(`like-count-${postId}`)
+            document.querySelectorAll('.like-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
 
-                fetch(`/add-like/${postId}/`, {
-                    method: 'POST',
-                    headers: {'X-CSRFToken': '{{ csrf_token }}',}
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.liked) {
-                        heart.classList.replace('far', 'fas');
-                    } else {
-                        heart.classList.replace('fas', 'far');
-                    }
-                    count.innerText = data.count;
+                    const postId = this.dataset.postId;
+                    const heart = document.getElementById(`like-heart-${postId}`)
+                    const count = document.getElementById(`like-count-${postId}`)
+
+                    fetch(`/add-like/${postId}/`, {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': '{{ csrf_token }}',}
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.liked) {
+                            heart.classList.replace('far', 'fas');
+                        } else {
+                            heart.classList.replace('fas', 'far');
+                        }
+                        count.innerText = data.count;
+                    });
                 });
             });
-        });
-    </script>
+
+            document.querySelectorAll('.add-friend-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const button = e.currentTarget;
+                    const url = button.dataset.url;
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {"X-CSRFToken": '{{ csrf_token }}',}
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'sent') {
+                            const userId = button.dataset.userId;
+                            const allButtonsForUser = document.querySelectorAll(`.add-friend-button[data-user-id="${userId}"]`);
+                            
+                            allButtonsForUser.forEach(item => {
+                                item.style.display = 'none';
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        </script>
+    </body>
 
 </html>

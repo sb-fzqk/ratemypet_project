@@ -7,20 +7,29 @@
 
 {% block body_block %}
     <div class="feed">
-    <h1> Search</h1>
+    <h1>Search</h1>
 
     <div class="search">
         <form method="GET">
             <!-- need to test the search bar -->
             <!-- probably need an if statement if there isnt a users/pets then you cant go to the page -->
             <!-- and also if it is a blank then cant press the buttons -->
-            <input type="text" name="q" placeholder="Search username/category">
+            <input type="text" name="q" placeholder="Search username">
 
             <div class="search-btn">
                 <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:search_users' %}">Search Users</button>
-                <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:search_pets' %}">Search Pets</button>
             </div>
         </form>
+    </div>
+
+    <h1>Browse Pet Categories</h1>
+
+    <div class="browse">
+        {% for category in pet_categories %}
+            <a href="{% url 'ratemypet:search_pets' %}?q={{ category.name }}">{{ category.name }}</a>
+        {% empty %}
+            <p>No categories at this moment.</p>
+        {% endfor %}
     </div>
     </div>
 {% endblock %}
