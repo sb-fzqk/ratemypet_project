@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body_block %}
-    <div class="feed">
+    <div class="layout">
     <h1>Search</h1>
 
     <div class="search">
@@ -26,7 +26,8 @@
 
     <div>
         {% for category in pet_categories %}
-            <a href="{% url 'ratemypet:search_pets' %}?q={{ category.name }}">{{ category.name }}</a>
+            <a href="{% url 'ratemypet:search_pets' %}?q={{ category.name }} " style="background: white; border: 2px solid black; padding:5px 15px;
+                                                                                        border-radius:6px; cursor:pointer; align-self: center;">{{ category.name }}</a>
         {% empty %}
             <p>No categories at this moment.</p>
         {% endfor %}
