@@ -24,4 +24,6 @@ urlpatterns = [
     path('accept-friend/<int:request_id>', views.accept_friend_request, name='accept_request'),
     path('decline-friend/<int:request_id>/', views.decline_friend_request, name='decline_request'),
     path('add-like/<int:post_id>/', views.add_like, name='add-like'),
+    path('post/<int:post_id>/comments/', views.post_comments, name= 'post_comments'),
+    path('post/<int:post_id>/comments/add/', views.add_comment, name= 'add_comment'),
 ]

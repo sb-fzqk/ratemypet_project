@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from ratemypet.models import Message, Post, Comment, UserProfile, FriendRequest, PetCategory, Notification
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -9,7 +9,15 @@ from django.views.decorators.http import require_POST
 @login_required
 def home(request):
     user = request.user
-    posts = Post.objects.all().order_by('-date_posted')
+    posts = Post.objects.all().order_by('-date_posted').prefetch_related(
+        'likes',
+        'author__profile',
+        Prefetch(
+            'comment_set',
+            queryset=Comment.objects.select_related('author').order_by('-id'),
+            to_attr='ordered_comments'
+        )
+    )
 
     user_friends = request.user.profile.friends.all()
     friend_requests_received = FriendRequest.objects.filter(receiver=user)
@@ -252,5 +260,28 @@ def get_message(request, username):
             'is_own': message.sender == request.user
         })
         return JsonResponse({'message': message_data})
-        
+
+@login_required
+def post_comments(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    comments = Comment.objects.filter(post=post).select_related('author').order_by('-id')
+    context={
+        'post': post,
+        'comments' : comments,
+    }
+    return render(request, 'ratemypet/post_comments.html', context)
+
+@login_required
+@require_POST
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    content = request.POST.get('content', '').strip()
+    if content:
+        Comment.objects.create(
+            post=post,
+            author=request.user,
+            content=content
+        )
+        return redirect('ratemypet:post_comments', post_id=post.id)
+
     
