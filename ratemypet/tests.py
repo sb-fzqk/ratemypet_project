@@ -1,8 +1,18 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
-from ratemypet.models import UserProfile, PetCategory, Post, Comment, Message
+from django.core.files.uploadedfile import SimpleUploadedFile
+from ratemypet.models import UserProfile, PetCategory, Post, Comment, Message, Notification, FriendRequest
 from ratemypet import views
+
+
+# ---------------------------------------------------------------------------
+# Helper
+# ---------------------------------------------------------------------------
+
+def make_post(user, category, caption='Test caption'):
+    image = SimpleUploadedFile('test.jpg', b'fakeimagecontent', content_type='image/jpeg')
+    return Post.objects.create(author=user, category=category, image=image, caption=caption)
 
 
 # ===========================================================================
@@ -13,7 +23,9 @@ class UserProfileModelTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='pass123')
-        self.profile = UserProfile.objects.create(user=self.user, about='I love pets')
+        self.profile = UserProfile.objects.get(user=self.user)  # auto-created by signal
+        self.profile.about = 'I love pets'
+        self.profile.save()
 
     def test_str_returns_username(self):
         self.assertEqual(str(self.profile), 'testuser')
@@ -45,26 +57,22 @@ class PostModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='poster', password='pass123')
         self.category = PetCategory.objects.create(name='Cat')
-        self.post = Post.objects.create(
-            user_name=self.user,
-            category=self.category,
-            image_url='http://example.com/cat.jpg',
-            caption='My cute cat',
-        )
+        self.post = make_post(self.user, self.category, caption='My cute cat')
 
     def test_str_returns_caption(self):
         self.assertEqual(str(self.post), 'My cute cat')
 
     def test_default_likes_is_zero(self):
-        self.assertEqual(self.post.likes, 0)
+        self.assertEqual(self.post.likes.count(), 0)
 
     def test_cascade_delete_when_user_deleted(self):
         self.user.delete()
         self.assertEqual(Post.objects.count(), 0)
 
-    def test_cascade_delete_when_category_deleted(self):
+    def test_category_set_null_when_category_deleted(self):
         self.category.delete()
-        self.assertEqual(Post.objects.count(), 0)
+        self.post.refresh_from_db()
+        self.assertIsNone(self.post.category)
 
 
 class CommentModelTest(TestCase):
@@ -73,27 +81,18 @@ class CommentModelTest(TestCase):
         self.user = User.objects.create_user(username='commenter', password='pass123')
         self.post_user = User.objects.create_user(username='poster', password='pass123')
         self.category = PetCategory.objects.create(name='Rabbit')
-        self.post = Post.objects.create(
-            user_name=self.post_user,
-            category=self.category,
-            image_url='http://example.com/rabbit.jpg',
-            caption='My rabbit',
-        )
+        self.post = make_post(self.post_user, self.category, caption='My rabbit')
 
     def test_str_truncated_to_30_chars(self):
-        comment = Comment.objects.create(
-            post=self.post, user_name=self.user, content='A' * 40
-        )
+        comment = Comment.objects.create(post=self.post, author=self.user, content='A' * 40)
         self.assertEqual(str(comment), 'A' * 30)
 
     def test_str_short_content(self):
-        comment = Comment.objects.create(
-            post=self.post, user_name=self.user, content='Cute!'
-        )
+        comment = Comment.objects.create(post=self.post, author=self.user, content='Cute!')
         self.assertEqual(str(comment), 'Cute!')
 
     def test_cascade_delete_when_post_deleted(self):
-        Comment.objects.create(post=self.post, user_name=self.user, content='Cute!')
+        Comment.objects.create(post=self.post, author=self.user, content='Cute!')
         self.post.delete()
         self.assertEqual(Comment.objects.count(), 0)
 
@@ -114,9 +113,7 @@ class MessageModelTest(TestCase):
         self.assertIsNotNone(self.message.timestamp)
 
     def test_messages_ordered_by_timestamp(self):
-        msg2 = Message.objects.create(
-            sender=self.sender, receiver=self.receiver, content='Second!'
-        )
+        msg2 = Message.objects.create(sender=self.sender, receiver=self.receiver, content='Second!')
         messages = list(Message.objects.all())
         self.assertEqual(messages[0], self.message)
         self.assertEqual(messages[1], msg2)
@@ -200,7 +197,6 @@ class LoginRequiredTest(TestCase):
 
 
 class StubViewsTest(TestCase):
-    """Views that currently render a template with no extra logic."""
 
     def setUp(self):
         self.client = Client()
@@ -211,7 +207,9 @@ class StubViewsTest(TestCase):
         self.assertEqual(self.client.get(reverse('ratemypet:home')).status_code, 200)
 
     def test_home_uses_correct_template(self):
-        self.assertTemplateUsed(self.client.get(reverse('ratemypet:home')), 'ratemypet/home.html')
+        self.assertTemplateUsed(
+            self.client.get(reverse('ratemypet:home')), 'ratemypet/home.html'
+        )
 
     def test_post_returns_200(self):
         self.assertEqual(self.client.get(reverse('ratemypet:post')).status_code, 200)
@@ -333,13 +331,7 @@ class NotificationsViewTest(TestCase):
         self.user = User.objects.create_user(username='notifuser', password='pass123')
         self.other = User.objects.create_user(username='other', password='pass123')
         self.category = PetCategory.objects.create(name='Dog')
-        self.post = Post.objects.create(
-            user_name=self.user,
-            category=self.category,
-            image_url='http://example.com/dog.jpg',
-            caption='My dog',
-            likes=3,
-        )
+        self.post = make_post(self.user, self.category, caption='My dog')
         self.client.login(username='notifuser', password='pass123')
 
     def test_returns_200(self):
@@ -348,29 +340,206 @@ class NotificationsViewTest(TestCase):
 
     def test_other_users_comment_appears(self):
         comment = Comment.objects.create(
-            post=self.post, user_name=self.other, content='Nice dog!'
+            post=self.post, author=self.other, content='Nice dog!'
         )
         response = self.client.get(reverse('ratemypet:notifications'))
         self.assertIn(comment, response.context['recent_comments'])
 
     def test_own_comments_excluded(self):
         own_comment = Comment.objects.create(
-            post=self.post, user_name=self.user, content='My own comment'
+            post=self.post, author=self.user, content='My own comment'
         )
         response = self.client.get(reverse('ratemypet:notifications'))
         self.assertNotIn(own_comment, response.context['recent_comments'])
 
-    def test_liked_posts_in_context(self):
-        response = self.client.get(reverse('ratemypet:notifications'))
-        self.assertIn(self.post, response.context['liked_posts'])
-
-    def test_post_with_zero_likes_not_in_liked_posts(self):
-        unloved = Post.objects.create(
-            user_name=self.user,
-            category=self.category,
-            image_url='http://example.com/x.jpg',
-            caption='Nobody likes this',
-            likes=0,
+    def test_like_notification_in_context(self):
+        Notification.objects.create(
+            receiver=self.user, sender=self.other, post=self.post, type='like'
         )
         response = self.client.get(reverse('ratemypet:notifications'))
-        self.assertNotIn(unloved, response.context['liked_posts'])
+        self.assertEqual(response.context['likes'].count(), 1)
+
+    def test_no_likes_when_no_notifications(self):
+        response = self.client.get(reverse('ratemypet:notifications'))
+        self.assertEqual(response.context['likes'].count(), 0)
+
+
+# ===========================================================================
+# EXTRA MODEL TESTS
+# ===========================================================================
+
+class FriendRequestModelTest(TestCase):
+
+    def setUp(self):
+        self.requester = User.objects.create_user(username='requester', password='pass123')
+        self.receiver = User.objects.create_user(username='receiver', password='pass123')
+        self.fr = FriendRequest.objects.create(requester=self.requester, receiver=self.receiver)
+
+    def test_str_format(self):
+        self.assertEqual(str(self.fr), 'requester to receiver')
+
+    def test_cascade_delete_when_requester_deleted(self):
+        self.requester.delete()
+        self.assertEqual(FriendRequest.objects.count(), 0)
+
+    def test_cascade_delete_when_receiver_deleted(self):
+        self.receiver.delete()
+        self.assertEqual(FriendRequest.objects.count(), 0)
+
+
+class PostTotalLikesTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='poster', password='pass123')
+        self.liker = User.objects.create_user(username='liker', password='pass123')
+        self.category = PetCategory.objects.create(name='Fish')
+        self.post = make_post(self.user, self.category, caption='My fish')
+
+    def test_total_likes_increases_when_user_likes(self):
+        self.post.likes.add(self.liker)
+        self.assertEqual(self.post.total_likes(), 1)
+
+    def test_total_likes_zero_by_default(self):
+        self.assertEqual(self.post.total_likes(), 0)
+
+
+# ===========================================================================
+# EXTRA URL TESTS
+# ===========================================================================
+
+class ExtraURLResolutionTest(TestCase):
+
+    def test_edit_profile_url(self):
+        self.assertEqual(reverse('ratemypet:edit_profile'), '/profile/edit/')
+
+    def test_settings_url(self):
+        self.assertEqual(reverse('ratemypet:settings'), '/settings/')
+
+    def test_search_users_url(self):
+        self.assertEqual(reverse('ratemypet:search_users'), '/search/users/')
+
+    def test_search_pets_url(self):
+        self.assertEqual(reverse('ratemypet:search_pets'), '/search/pets/')
+
+
+# ===========================================================================
+# EXTRA VIEW TESTS
+# ===========================================================================
+
+class AddLikeViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='liker', password='pass123')
+        self.owner = User.objects.create_user(username='owner', password='pass123')
+        self.category = PetCategory.objects.create(name='Bird')
+        self.post = make_post(self.owner, self.category, caption='My bird')
+        self.client.login(username='liker', password='pass123')
+
+    def test_like_returns_json_response(self):
+        response = self.client.get(
+            reverse('ratemypet:add-like', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn('liked', data)
+        self.assertIn('count', data)
+
+    def test_like_adds_user_to_likes(self):
+        self.client.get(reverse('ratemypet:add-like', kwargs={'post_id': self.post.id}))
+        self.assertIn(self.user, self.post.likes.all())
+
+    def test_unlike_removes_user_from_likes(self):
+        self.post.likes.add(self.user)
+        self.client.get(reverse('ratemypet:add-like', kwargs={'post_id': self.post.id}))
+        self.assertNotIn(self.user, self.post.likes.all())
+
+    def test_like_creates_notification_for_other_users_post(self):
+        self.client.get(reverse('ratemypet:add-like', kwargs={'post_id': self.post.id}))
+        self.assertTrue(
+            Notification.objects.filter(sender=self.user, post=self.post, type='like').exists()
+        )
+
+    def test_like_does_not_create_notification_for_own_post(self):
+        own_post = make_post(self.user, self.category, caption='My own post')
+        self.client.get(reverse('ratemypet:add-like', kwargs={'post_id': own_post.id}))
+        self.assertFalse(
+            Notification.objects.filter(sender=self.user, post=own_post, type='like').exists()
+        )
+
+
+class FriendRequestViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.alice = User.objects.create_user(username='alice', password='pass123')
+        self.bob = User.objects.create_user(username='bob', password='pass123')
+        self.client.login(username='alice', password='pass123')
+
+    def test_send_friend_request_creates_request(self):
+        self.client.get(reverse('ratemypet:send_request', kwargs={'user_id': self.bob.id}))
+        self.assertTrue(
+            FriendRequest.objects.filter(requester=self.alice, receiver=self.bob).exists()
+        )
+
+    def test_send_friend_request_redirects(self):
+        response = self.client.get(
+            reverse('ratemypet:send_request', kwargs={'user_id': self.bob.id})
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_accept_friend_request_adds_to_friends(self):
+        fr = FriendRequest.objects.create(requester=self.alice, receiver=self.bob)
+        self.client.login(username='bob', password='pass123')
+        self.client.get(reverse('ratemypet:accept_request', kwargs={'request_id': fr.id}))
+        self.assertIn(self.alice, self.bob.profile.friends.all())
+
+    def test_accept_friend_request_deletes_request(self):
+        fr = FriendRequest.objects.create(requester=self.alice, receiver=self.bob)
+        self.client.login(username='bob', password='pass123')
+        self.client.get(reverse('ratemypet:accept_request', kwargs={'request_id': fr.id}))
+        self.assertEqual(FriendRequest.objects.count(), 0)
+
+    def test_decline_friend_request_deletes_request(self):
+        fr = FriendRequest.objects.create(requester=self.alice, receiver=self.bob)
+        self.client.login(username='bob', password='pass123')
+        self.client.get(reverse('ratemypet:decline_request', kwargs={'request_id': fr.id}))
+        self.assertEqual(FriendRequest.objects.count(), 0)
+
+
+class EditProfileViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='edituser', password='pass123')
+        self.client.login(username='edituser', password='pass123')
+
+    def test_get_returns_200(self):
+        self.assertEqual(self.client.get(reverse('ratemypet:edit_profile')).status_code, 200)
+
+    def test_post_updates_about(self):
+        self.client.post(reverse('ratemypet:edit_profile'), {'caption': 'New bio'})
+        self.assertEqual(UserProfile.objects.get(user=self.user).about, 'New bio')
+
+    def test_post_redirects(self):
+        response = self.client.post(reverse('ratemypet:edit_profile'), {'caption': 'Bio'})
+        self.assertEqual(response.status_code, 302)
+
+
+class SettingsPasswordTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='settingsuser', password='oldpass123')
+        self.client.login(username='settingsuser', password='oldpass123')
+
+    def test_password_change_redirects(self):
+        response = self.client.post(
+            reverse('ratemypet:settings'), {'new_password': 'newpass456'}
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_password_is_updated(self):
+        self.client.post(reverse('ratemypet:settings'), {'new_password': 'newpass456'})
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('newpass456'))
