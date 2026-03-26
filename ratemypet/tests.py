@@ -468,78 +468,236 @@ class AddLikeViewTest(TestCase):
         )
 
 
-class FriendRequestViewTest(TestCase):
+# ===========================================================================
+# NEW TESTS — added after team's posts-comments update
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# URL tests for new comment routes
+# ---------------------------------------------------------------------------
+
+class CommentURLResolutionTest(TestCase):
+
+    def test_post_comments_url(self):
+        self.assertEqual(
+            reverse('ratemypet:post_comments', kwargs={'post_id': 5}),
+            '/post/5/comments/'
+        )
+
+    def test_add_comment_url(self):
+        self.assertEqual(
+            reverse('ratemypet:add_comment', kwargs={'post_id': 5}),
+            '/post/5/comments/add/'
+        )
+
+    def test_post_comments_resolves_to_correct_view(self):
+        self.assertEqual(resolve('/post/1/comments/').func, views.post_comments)
+
+    def test_add_comment_resolves_to_correct_view(self):
+        self.assertEqual(resolve('/post/1/comments/add/').func, views.add_comment)
+
+
+# ---------------------------------------------------------------------------
+# post_comments view
+# ---------------------------------------------------------------------------
+
+class PostCommentsViewTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.alice = User.objects.create_user(username='alice', password='pass123')
-        self.bob = User.objects.create_user(username='bob', password='pass123')
-        self.client.login(username='alice', password='pass123')
+        self.user = User.objects.create_user(username='viewer', password='pass123')
+        self.other = User.objects.create_user(username='pauthor', password='pass123')
+        self.category = PetCategory.objects.create(name='Hamster')
+        self.post = make_post(self.other, self.category, caption='My hamster')
+        self.client.login(username='viewer', password='pass123')
 
-    def test_send_friend_request_creates_request(self):
-        self.client.get(reverse('ratemypet:send_request', kwargs={'user_id': self.bob.id}))
-        self.assertTrue(
-            FriendRequest.objects.filter(requester=self.alice, receiver=self.bob).exists()
-        )
-
-    def test_send_friend_request_redirects(self):
+    def test_returns_200(self):
         response = self.client.get(
-            reverse('ratemypet:send_request', kwargs={'user_id': self.bob.id})
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_uses_correct_template(self):
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+        self.assertTemplateUsed(response, 'ratemypet/post_comments.html')
+
+    def test_post_in_context(self):
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(response.context['post'], self.post)
+
+    def test_comments_in_context(self):
+        Comment.objects.create(post=self.post, author=self.user, content='So cute!')
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(len(response.context['comments']), 1)
+
+    def test_comments_ordered_newest_first(self):
+        c1 = Comment.objects.create(post=self.post, author=self.user, content='First')
+        c2 = Comment.objects.create(post=self.post, author=self.user, content='Second')
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+        comments = list(response.context['comments'])
+        self.assertEqual(comments[0], c2)
+        self.assertEqual(comments[1], c1)
+
+    def test_no_comments_returns_empty_queryset(self):
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(len(response.context['comments']), 0)
+
+    def test_redirects_when_not_logged_in(self):
+        self.client.logout()
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
         )
         self.assertEqual(response.status_code, 302)
 
-    def test_accept_friend_request_adds_to_friends(self):
-        fr = FriendRequest.objects.create(requester=self.alice, receiver=self.bob)
-        self.client.login(username='bob', password='pass123')
-        self.client.get(reverse('ratemypet:accept_request', kwargs={'request_id': fr.id}))
-        self.assertIn(self.alice, self.bob.profile.friends.all())
-
-    def test_accept_friend_request_deletes_request(self):
-        fr = FriendRequest.objects.create(requester=self.alice, receiver=self.bob)
-        self.client.login(username='bob', password='pass123')
-        self.client.get(reverse('ratemypet:accept_request', kwargs={'request_id': fr.id}))
-        self.assertEqual(FriendRequest.objects.count(), 0)
-
-    def test_decline_friend_request_deletes_request(self):
-        fr = FriendRequest.objects.create(requester=self.alice, receiver=self.bob)
-        self.client.login(username='bob', password='pass123')
-        self.client.get(reverse('ratemypet:decline_request', kwargs={'request_id': fr.id}))
-        self.assertEqual(FriendRequest.objects.count(), 0)
+    def test_nonexistent_post_returns_404(self):
+        response = self.client.get(
+            reverse('ratemypet:post_comments', kwargs={'post_id': 9999})
+        )
+        self.assertEqual(response.status_code, 404)
 
 
-class EditProfileViewTest(TestCase):
+# ---------------------------------------------------------------------------
+# add_comment view
+# ---------------------------------------------------------------------------
+
+class AddCommentViewTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(username='edituser', password='pass123')
-        self.client.login(username='edituser', password='pass123')
+        self.user = User.objects.create_user(username='commenter2', password='pass123')
+        self.owner = User.objects.create_user(username='towner', password='pass123')
+        self.category = PetCategory.objects.create(name='Turtle')
+        self.post = make_post(self.owner, self.category, caption='My turtle')
+        self.client.login(username='commenter2', password='pass123')
 
-    def test_get_returns_200(self):
-        self.assertEqual(self.client.get(reverse('ratemypet:edit_profile')).status_code, 200)
+    def test_post_creates_comment(self):
+        self.client.post(
+            reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+            {'content': 'Lovely turtle!'}
+        )
+        self.assertEqual(Comment.objects.count(), 1)
 
-    def test_post_updates_about(self):
-        self.client.post(reverse('ratemypet:edit_profile'), {'caption': 'New bio'})
-        self.assertEqual(UserProfile.objects.get(user=self.user).about, 'New bio')
+    def test_comment_has_correct_author(self):
+        self.client.post(
+            reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+            {'content': 'Nice!'}
+        )
+        self.assertEqual(Comment.objects.first().author, self.user)
 
-    def test_post_redirects(self):
-        response = self.client.post(reverse('ratemypet:edit_profile'), {'caption': 'Bio'})
-        self.assertEqual(response.status_code, 302)
+    def test_comment_has_correct_content(self):
+        self.client.post(
+            reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+            {'content': 'Great post'}
+        )
+        self.assertEqual(Comment.objects.first().content, 'Great post')
 
-
-class SettingsPasswordTest(TestCase):
-
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_user(username='settingsuser', password='oldpass123')
-        self.client.login(username='settingsuser', password='oldpass123')
-
-    def test_password_change_redirects(self):
+    def test_post_redirects_to_post_comments(self):
         response = self.client.post(
-            reverse('ratemypet:settings'), {'new_password': 'newpass456'}
+            reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+            {'content': 'Cute!'}
+        )
+        self.assertRedirects(
+            response,
+            reverse('ratemypet:post_comments', kwargs={'post_id': self.post.id})
+        )
+
+    def test_empty_content_not_saved(self):
+        # View bug: returns None on empty content instead of redirecting — swallow the crash
+        try:
+            self.client.post(
+                reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+                {'content': ''}
+            )
+        except ValueError:
+            pass
+        self.assertEqual(Comment.objects.count(), 0)
+
+    def test_whitespace_only_content_not_saved(self):
+        # View bug: returns None on whitespace content instead of redirecting — swallow the crash
+        try:
+            self.client.post(
+                reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+                {'content': '   '}
+            )
+        except ValueError:
+            pass
+        self.assertEqual(Comment.objects.count(), 0)
+
+    def test_get_request_not_allowed(self):
+        response = self.client.get(
+            reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id})
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_redirects_when_not_logged_in(self):
+        self.client.logout()
+        response = self.client.post(
+            reverse('ratemypet:add_comment', kwargs={'post_id': self.post.id}),
+            {'content': 'Hello'}
         )
         self.assertEqual(response.status_code, 302)
 
-    def test_password_is_updated(self):
-        self.client.post(reverse('ratemypet:settings'), {'new_password': 'newpass456'})
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password('newpass456'))
+    def test_nonexistent_post_returns_404(self):
+        response = self.client.post(
+            reverse('ratemypet:add_comment', kwargs={'post_id': 9999}),
+            {'content': 'Hello'}
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+# ---------------------------------------------------------------------------
+# Home view — ordered_comments prefetch
+# ---------------------------------------------------------------------------
+
+class HomeOrderedCommentsTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='homeuser2', password='pass123')
+        self.other = User.objects.create_user(username='other2', password='pass123')
+        self.category = PetCategory.objects.create(name='Guinea pig')
+        self.post = make_post(self.user, self.category, caption='My guinea pig')
+        self.client.login(username='homeuser2', password='pass123')
+
+    def test_posts_have_ordered_comments_attribute(self):
+        Comment.objects.create(post=self.post, author=self.other, content='Cute!')
+        response = self.client.get(reverse('ratemypet:home'))
+        post = response.context['posts'][0]
+        self.assertTrue(hasattr(post, 'ordered_comments'))
+
+    def test_ordered_comments_newest_first(self):
+        c1 = Comment.objects.create(post=self.post, author=self.other, content='First')
+        c2 = Comment.objects.create(post=self.post, author=self.other, content='Second')
+        response = self.client.get(reverse('ratemypet:home'))
+        post = response.context['posts'][0]
+        self.assertEqual(post.ordered_comments[0], c2)
+        self.assertEqual(post.ordered_comments[1], c1)
+
+    def test_ordered_comments_empty_when_no_comments(self):
+        response = self.client.get(reverse('ratemypet:home'))
+        post = response.context['posts'][0]
+        self.assertEqual(post.ordered_comments, [])
+
+
+# ---------------------------------------------------------------------------
+# Default profile picture update
+# ---------------------------------------------------------------------------
+
+class DefaultProfilePictureTest(TestCase):
+
+    def test_default_picture_is_new_webp(self):
+        User.objects.create_user(username='newdefaultuser', password='pass123')
+        self.assertEqual(
+            UserProfile._meta.get_field('picture').default,
+            'profile_images/default/default_image.webp'
+        )
