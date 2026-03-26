@@ -22,5 +22,6 @@ urlpatterns = [
     path('search/pets/', views.search_pets, name='search_pets'),
     path('send-friend/<int:user_id>/', views.add_friend, name='send_request'),
     path('accept-friend/<int:request_id>', views.accept_friend_request, name='accept_request'),
-    path('decline-friend/<int:request_id>/', views.decline_friend_request, name='decline_request')
+    path('decline-friend/<int:request_id>/', views.decline_friend_request, name='decline_request'),
+    path('add-like/<int:post_id>/', views.add_like, name='add-like'),
 ]

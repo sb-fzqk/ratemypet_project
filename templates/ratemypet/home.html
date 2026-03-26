@@ -39,10 +39,10 @@
 
         <div class="post-actions">
             <!-- make heart a button connent it to the database  -->
-            <a href="#" class="like-btn" data-id="{{ post.id }}">
-                <i class="fa-heart {% if user in post.likes.all %}fa-solid {% else %}fa-regular{% endif %}"></i>
-                <span>{{ post.likes.count }}</span>
-            </a>
+            <button class="like-btn" data-post-id="{{ post.id }}" style="background:none; border:none; padding:0;">
+                <i class="heart-icon {% if request.user in post.likes.all %}fas{% else %}far{% endif %} fa-heart" id="like-heart-{{ post.id }}"></i>
+                <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
+            </button>
             <!-- make comment a button to see all the other comments -->
             <i class="fa-regular fa-comment"></i>
             <!-- get the pet category -->

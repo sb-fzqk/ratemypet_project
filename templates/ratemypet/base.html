@@ -57,6 +57,30 @@
                 <a href="{% url 'login' %}">Login</a>
             </div>
         {% endif %}
-    </body>
+        </body>
+
+        <script>
+        document.querySelectorAll('.like-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const postId = this.dataset.postId;
+                const heart = document.getElementById(`like-heart-${postId}`)
+                const count = document.getElementById(`like-count-${postId}`)
+
+                fetch(`/add-like/${postId}/`, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': '{{ csrf_token }}',}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        heart.classList.replace('far', 'fas');
+                    } else {
+                        heart.classList.replace('fas', 'far');
+                    }
+                    count.innerText = data.count;
+                });
+            });
+        });
+    </script>
 
 </html>
