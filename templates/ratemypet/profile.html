@@ -59,7 +59,12 @@
 
                 <div class="post-comment">
                     <!-- get the most recent comment  -->
-                    <b>user2:</b> OMG LOVE
+                {% if post.ordered_comments %}
+                    <b>{{ post.ordered_comments.0.author.username }}:</b>
+                    {{post.ordered_comments.0.content}}
+                {% else %}
+                <span>No comment yet</span>
+                {% endif %}
                 </div>
             </div>
              {% endfor %}
