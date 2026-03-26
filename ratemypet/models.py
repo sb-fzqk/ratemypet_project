@@ -9,7 +9,7 @@ class UserProfile(models.Model):
     ABOUT_MAX_LENGTH = 100
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    picture = models.ImageField(default='profile_images/default/bawcat.jpeg', upload_to='profile_images')
+    picture = models.ImageField(default='profile_images/default/default_image.webp', upload_to='profile_images')
     about = models.CharField(max_length=ABOUT_MAX_LENGTH, blank=True)
     friends = models.ManyToManyField(User, related_name='friends', blank=True)
 

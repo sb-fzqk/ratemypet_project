@@ -16,8 +16,7 @@
 
         <div class="post-header">
             <div class="user-info">
-                <i class="fa-regular fa-user"></i>
-                <img src="{{ post.author.profile.picture.url }}" style="width:50px">
+                <img src="{{ post.author.profile.picture.url }}" style="width:40px; height:40px; border-radius: 50%; object-fit: cover; border: 2px solid black;">
                 {{ post.author.username }}
             </div>
             <!-- add an if statement - button to make people be friends with each other -->

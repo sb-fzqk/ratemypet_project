@@ -6,38 +6,37 @@
 {% endblock %}
 
 {% block body_block %}
-    <div class="feed">
-    <h1> My Profile</h1>
+    <div class="profile-layout">
+        <h1> My Profile</h1>
 
-    <div class="profile">
-        <!-- need to get the image of  the user
-        if there is not user then below code -->
-        <div class="profile-pic">
-            <img src="{{ user.profile.picture.url }}" alt="Profile Picture" style="width:100px">
+        <div class="profile-info">
+            <!-- need to get the image of  the user
+            if there is not user then below code -->
+            <div class="profile-pic">
+                <img src="{{ user.profile.picture.url }}" alt="Profile Picture" style="width:100px">
+            </div>
+
+            <div class="info">
+                <!-- get the username of the user -->
+                <h3>{{ user.profile.user }}</h3>
+                <!-- needs to change the 10 to getting the number of friends the user have -->
+                <p> Friends: {{ user.profile.friends.count }}</p>
+                <p> Posts: {{ user_posts.count }}
+            </div>
+
+            <div class="bio">
+                <!-- needs to get the bio of the user -->
+                {{ user.profile.about }}
+            </div>
+
+            <form method="get">
+                <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:edit_profile' %}">Edit</button>
+            </form>
         </div>
-
-        <div class="info">
-            <!-- get the username of the user -->
-            <h3>{{ user.profile.user }}</h3>
-            <!-- needs to change the 10 to getting the number of friends the user have -->
-            <p> Friends: {{ user.profile.friends.count }}</p>
-            <p> Posts: {{ user_posts.count }}
-        </div>
-
-        <div class="bio">
-            <!-- needs to get the bio of the user -->
-            {{ user.profile.about }}
-        </div>
-
-        <form method="get">
-            <button type="submit" class="upload-btn" formaction="{% url 'ratemypet:edit_profile' %}">Edit</button>
-        </form>
         
-        <!-- if statement if there is no post -> wirte you have no posts -->
-        <div class="posts">
+        <div class = "posts-feed">
             {% for post in user_posts %}
-            <div class="post">
-
+            <div class="profile-posts">
                 <div class="post-image">
                     <img src="{{ post.image.url }}" class="post-img">
                 </div>
@@ -63,9 +62,9 @@
                     <b>user2:</b> OMG LOVE
                 </div>
             </div>
-            {% endfor %}
+             {% endfor %}
         </div>
     </div>
-    </div>
+
 
 {% endblock %}
