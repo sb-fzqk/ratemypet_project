@@ -9,55 +9,55 @@
 {% block body_block %}
 
     <div class="feed">
-    <h1> Home</h1>
+        <h1> Home</h1>
 
-    {% for post in posts %}
-    <div class="post">
+        {% for post in posts %}
+        <div class="post">
 
-        <div class="post-header">
-            <div class="user-info">
-                <img src="{{ post.author.profile.picture.url }}" style="width:40px; height:40px; border-radius: 50%; object-fit: cover; border: 2px solid black;">
-                {{ post.author.username }}
-            </div>
-            <!-- add an if statement - button to make people be friends with each other -->
-            {% if post.author != user %}
-                {% if post.author in user_friends %}
-                    <span class="friends">Friend</span>
-                {% elif post.author in friend_requests_sent or post.author in friend_requests_received %}
-                    <span class="pending">Friendship Pending</span>
-                {% else %}
-                    <a href="{% url 'ratemypet:send_request' post.author.id %}" class="add-friend-button">Add Friend</a>
+            <div class="post-header">
+                <div class="user-info">
+                    <img src="{{ post.author.profile.picture.url }}" style="width:40px; height:40px; border-radius: 50%; object-fit: cover; border: 2px solid black;">
+                    {{ post.author.username }}
+                </div>
+                <!-- add an if statement - button to make people be friends with each other -->
+                {% if post.author != user %}
+                    {% if post.author in user_friends %}
+                        <span class="friends">Friend</span>
+                    {% elif post.author in friend_requests_sent or post.author in friend_requests_received %}
+                        <span class="pending">Friendship Pending</span>
+                    {% else %}
+                        <a href="{% url 'ratemypet:send_request' post.author.id %}" class="add-friend-button">Add Friend</a>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        </div>
+            </div>
 
 
-        <div class="post-image">
-            <img src="{{ post.image.url }}" class="post-img">
-        </div>
+            <div class="post-image">
+                <img src="{{ post.image.url }}" class="post-img">
+            </div>
 
-        <div class="post-actions">
-            <!-- make heart a button connent it to the database  -->
-            <button class="like-btn" data-post-id="{{ post.id }}" style="background:none; border:none; padding:0;">
-                <i class="heart-icon {% if request.user in post.likes.all %}fas{% else %}far{% endif %} fa-heart" id="like-heart-{{ post.id }}"></i>
-                <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
-            </button>
-            <!-- make comment a button to see all the other comments -->
-            <i class="fa-regular fa-comment"></i>
-            <!-- get the pet category -->
-            <span class="pet-type">{{ post.category }}</span>
-        </div>
-
-
-        <div class="post-caption">
-            {{ post.caption }}
-        </div>
+            <div class="post-actions">
+                <!-- make heart a button connent it to the database  -->
+                <button class="like-btn" data-post-id="{{ post.id }}" style="background:none; border:none; padding:0;">
+                    <i class="heart-icon {% if request.user in post.likes.all %}fas{% else %}far{% endif %} fa-heart" id="like-heart-{{ post.id }}"></i>
+                    <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span>
+                </button>
+                <!-- make comment a button to see all the other comments -->
+                <i class="fa-regular fa-comment"></i>
+                <!-- get the pet category -->
+                <span class="pet-type">{{ post.category }}</span>
+            </div>
 
 
-        <div class="post-comment">
-            <!-- get the most recent comment  -->
-            <b>user2:</b> OMG LOVE
-        </div>
+            <div class="post-caption">
+                {{ post.caption }}
+            </div>
+
+
+            <div class="post-comment">
+                <!-- get the most recent comment  -->
+                <b>user2:</b> OMG LOVE
+            </div>
 
     </div>
     {% endfor %}
