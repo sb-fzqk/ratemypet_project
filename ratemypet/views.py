@@ -97,9 +97,14 @@ def add_like(request, post_id):
 
 @login_required
 def add_friend(request, user_id):
-    receiving_user = get_object_or_404(User, id=user_id)
-    FriendRequest.objects.get_or_create(requester=request.user, receiver=receiving_user)
-    return redirect('ratemypet:home')
+    if request.method == 'POST':
+        receiving_user = get_object_or_404(User, id=user_id)
+            
+        if receiving_user != request.user:
+            FriendRequest.objects.get_or_create(requester=request.user, receiver=receiving_user)
+            return JsonResponse({'status': 'sent'})
+    
+    return JsonResponse({'status': 'error'}, status=400)
     
 @login_required
 def accept_friend_request(request, request_id):
@@ -219,15 +224,30 @@ def delete_account(request):
 
 @login_required
 def search(request):
-    return render(request, 'ratemypet/search.html')    
+    pet_categories = PetCategory.objects.all().order_by('name')
+    return render(request, 'ratemypet/search.html', {'pet_categories': pet_categories})    
 
 @login_required
 def search_users(request):
-    return render(request, 'ratemypet/users.html')  
+    query = request.GET.get('q', '').strip()
+    posts = Post.objects.filter(author__username__icontains=query).order_by('-date_posted')
+    title = f'Posts by users matching: {query}'
+
+    return render(request, 'ratemypet/results.html', {
+        'posts': posts,
+        'title': title
+    })  
 
 @login_required
 def search_pets(request):
-    return render(request, 'ratemypet/pets.html') 
+    category_name = request.GET.get('q', '')
+    posts = Post.objects.filter(category__name=category_name).order_by('-date_posted')
+    title = f'Posts in the {category_name} category'
+    
+    return render(request, 'ratemypet/results.html', {
+        'posts': posts,
+        'title': title
+    })
 
 @login_required
 @require_POST

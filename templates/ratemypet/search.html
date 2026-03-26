@@ -24,7 +24,7 @@
 
     <h1>Browse Pet Categories</h1>
 
-    <div class="browse">
+    <div>
         {% for category in pet_categories %}
             <a href="{% url 'ratemypet:search_pets' %}?q={{ category.name }}">{{ category.name }}</a>
         {% empty %}
